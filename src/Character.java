@@ -1,128 +1,74 @@
-import java.sql.SQLOutput;
-
+import java.util.Random;
 public class Character {
 
-    String charName = "Brann Bronzebeard";
-    String charRace = "Dwarf";
-    char charClass = 'H';
-    int charCurrentHealth = 100;
-    int charMaxHealth = 180;
-    int charLevel = 5;
-    int experiencePoints = 2250;
-    double charGold = 125.50;
-    boolean charIsAlive = true;
-    boolean canLevelUp;
 
-    String[] charInventory = {"Bow", "Arrows", "Potions"};
+    //Attributes for character
+    private String charName;
+    private char charClass;
+    private int charCurrentHealth;
+    private int charMaxHealth = 100;
+    private int charLevel = 5;
+    private boolean charIsAlive = true;
+    private int damage;
 
-
-    void getDivider() {
-        System.out.println("---------------------------");
-    }
-
-    void getInventory() {
-        System.out.println("Inventory (" + charInventory.length + " Items)");
+    //Henter tilfældigheds element og Inventory liste fra inventory klassen
+    private Inventory inventory;
+    static Random random = new Random();
 
 
-        for (int i = 0; i < charInventory.length; i++) {
-            System.out.println("-" + charInventory[i]);
-        }
+    //Constructor for hero character objekt
+    Character(String charName, char charClass, int damage) {
+        this.charName = charName;
+        this.charClass = charClass;
+        this.damage = damage;
+        this.charCurrentHealth = charMaxHealth;
+        this.inventory = new Inventory();
+
 
     }
+    //Constructor for enemy character objekt
+    Character(String charName) {
+        this.charName = charName;
+        this.charCurrentHealth = random.nextInt(50, 100);
+        this.damage = random.nextInt(15,30);
+    }
 
-    void getCharSheet() {
-        System.out.println("=== CHARACTER SHEET ===");
+    //Ally(hero) character sheet
+    public void  getCharSheet() {
+        System.out.println("=== " + this.charName + "'s SHEET ===");
         System.out.println("Name: " + charName);
         getCharClass();
-        System.out.println("Race: " + charRace);
         System.out.println("Level: " + charLevel);
         System.out.println("Health: " + charCurrentHealth + "/" + charMaxHealth);
-        System.out.println("XP: " + experiencePoints);
-        System.out.println("Gold: " + charGold);
+        System.out.println("Alive: " + charIsAlive);
+
+    }
+    //Enemy character sheet
+    public void  getCharSheet2() {
+        System.out.println("=== " + this.charName + "'s SHEET ===");
+        System.out.println("Name: " + charName);
+        System.out.println("Health: " + charCurrentHealth + "/" + charMaxHealth);
+        System.out.println("Damage: " + this.damage);
         System.out.println("Alive: " + charIsAlive);
     }
 
-    void checkLevelUp() { //Kan splittes så man laver et level check og en anden når man skal kalde metoden i andre metoder.
-        int expForNextLvl = (500 * charLevel) - experiencePoints;
-        if (experiencePoints >= 500 * charLevel) {
-            System.out.println("Ready to Level Up!");
-            canLevelUp = true;
-        } else {
-            System.out.println("Character still need: " + expForNextLvl + " exp to level up! ");
+
+    public Inventory getInventory() {
+        return inventory;
+    }
+
+    //Combat metode:
+    public void attack(Character target) {
+        target.charCurrentHealth -= this.damage;
+        if(target.charCurrentHealth <=0) {
+            target.charCurrentHealth = 0;
         }
+        System.out.println(charName +" attacks " + target.charName +" for " + damage + " damage");
     }
 
-    void takeDamage(int amount) {
-        charCurrentHealth -= amount;
-        System.out.println("Damage taken: " + amount);
-        System.out.println("Current HP: "+ charCurrentHealth);
 
-    }
 
-    void heal(int amount) { // Tager ikke højde for hvis man healer over max hp.. løsning skal findes
-        if (charCurrentHealth + amount <= charMaxHealth) {
-            charCurrentHealth += amount;
-            System.out.println("Healed: " + amount + "HP");
-        } else {
-            System.out.println("Already full health");
-        }
-        System.out.println("Current HP: " + charCurrentHealth);
-    }
-
-    void checkGold() {
-        System.out.println("Chararacter gold: " + charGold);
-    }
-
-    void addGold(double amount) {
-        charGold += amount;
-        System.out.println("Gold added: " + amount);
-        checkGold();
-    }
-
-    boolean removeGold(double amount) {
-
-        if (charGold >= amount) {
-            charGold -= amount;
-            System.out.println("Gold spent: " + amount);
-            checkGold();
-            return true;
-
-        } else {
-            return false;
-        }
-
-    }
-
-    void addexperience(int amount) {
-        experiencePoints += amount;
-        System.out.println("XP gained: " + amount);
-        checkLevelUp();
-
-    }
-
-    void levelUp(){
-        //checkLevelUp();
-        if(canLevelUp) {
-            charLevel++;
-            experiencePoints = 0;
-            charMaxHealth *= 1.1;
-            System.out.println("New level: " + charLevel );
-            System.out.println("New XP: " + experiencePoints);
-            System.out.println("New max HP: " + charMaxHealth);
-        } else {
-            System.out.println("Cant level up yet");
-        }
-    }
-
-    boolean isHealthCritical() {
-
-        if (charCurrentHealth < (charMaxHealth / 4)) {
-            return true;
-        } else {
-            return false;
-        }
-    }
-
+    //Getters
     boolean isAlive(){
         if (charCurrentHealth>0) {
             return true;
@@ -130,7 +76,15 @@ public class Character {
             return false; }
     }
 
-    void getStatusCheck() {
+    public String getCharName() {
+        return charName;
+    }
+
+    public int getCharCurrentHealth() {
+        return charCurrentHealth;
+    }
+
+    public void getStatusCheck() {
 
         if (isHealthCritical()) {
             System.out.println("WARNING: Health Critical!");
@@ -143,6 +97,15 @@ public class Character {
             System.out.println("Character is dead");
         }
         System.out.println("Health Percentage: " + getHealthPercentage() +"%");
+    }
+
+    boolean isHealthCritical() {
+
+        if (charCurrentHealth < (charMaxHealth / 4)) {
+            return true;
+        } else {
+            return false;
+        }
     }
 
     void getCharClass() {
@@ -174,30 +137,6 @@ public class Character {
     }
 
 
-    void main() {
-        getCharSheet();
-        getDivider();
-        getInventory();
-        getDivider();
-        checkLevelUp();
-        getDivider();
-        takeDamage(60);
-        getDivider();
-        heal(60);
-        getDivider();
-        addGold(20);
-        getDivider();
-        removeGold(40);
-        getDivider();
-        addexperience(250);
-        getDivider();
-        levelUp();
-        isHealthCritical();
-        getDivider();
-        getStatusCheck();
-        getCharSheet();
-
-    }
 
 
 }
